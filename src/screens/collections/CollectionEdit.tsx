@@ -120,7 +120,7 @@ const CollectionEdit = (collectionEdit: any) => {
         </View>
 
         <View style={styles.button}>
-          <ButtonSmall title="Cập nhật sản phẩm" onPress={handleSubmit} />
+          <ButtonSmall title="Cập nhật danh mục" onPress={handleSubmit} />
         </View>
       </View>
     </ScrollView>

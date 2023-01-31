@@ -7,6 +7,7 @@ import {
   View,
   Text,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {Icon} from '@rneui/themed';
 import theme from '../core/theme';
@@ -15,16 +16,19 @@ import ButtonSmall from '../components/ButtonSmall';
 import {useIsFocused} from '@react-navigation/native';
 const ProductManagement = ({navigation}: any) => {
   const [productList, setProductList] = useState<any>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const isFocused = useIsFocused();
   const [isUpdate, setIsUpdate] = useState(false);
   useEffect(() => {
+    setIsLoading(true);
     getProducts()
       .then(res => {
         if (res.data.count > 0) {
           setTotal(res.data.count);
           setProductList(res.data.data);
         }
+        setIsLoading(false);
       })
       .catch(err => {
         console.log(err);
@@ -86,98 +90,105 @@ const ProductManagement = ({navigation}: any) => {
         />
       </View>
       <View style={styles.body}>
-        <ScrollView>
-          {productList.map((item: any) => {
-            var url = item.preview;
-            if (url === '') {
-              url = 'https://petitemaika.com/brand.png';
-            }
-            var category = 'Không xác định';
-            if (item.category) {
-              category = item.category.name;
-            }
-            return (
-              <View key={item.id} style={styles.item}>
-                <View style={styles.info}>
-                  <Image source={{uri: url}} style={styles.image} />
-                  <View style={styles.detail}>
-                    <Text
-                      style={styles.itemName}
-                      numberOfLines={2}
-                      ellipsizeMode="middle">
-                      {item.name}
-                    </Text>
-                    <Text
-                      style={styles.itemName}
-                      numberOfLines={1}
-                      ellipsizeMode="middle">
-                      Giá: {item.defaultPrice} đ
-                    </Text>
-                    <Text
-                      style={styles.itemName}
-                      numberOfLines={2}
-                      ellipsizeMode="middle">
-                      Danh mục: {category}
-                    </Text>
+        {isLoading ? (
+          <View
+            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+            <ActivityIndicator size="large" />
+          </View>
+        ) : (
+          <ScrollView>
+            {productList.map((item: any) => {
+              var url = item.preview;
+              if (url === '') {
+                url = 'https://petitemaika.com/brand.png';
+              }
+              var category = 'Không xác định';
+              if (item.category) {
+                category = item.category.name;
+              }
+              return (
+                <View key={item.id} style={styles.item}>
+                  <View style={styles.info}>
+                    <Image source={{uri: url}} style={styles.image} />
+                    <View style={styles.detail}>
+                      <Text
+                        style={styles.itemName}
+                        numberOfLines={2}
+                        ellipsizeMode="middle">
+                        {item.name}
+                      </Text>
+                      <Text
+                        style={styles.itemName}
+                        numberOfLines={1}
+                        ellipsizeMode="middle">
+                        Giá: {item.defaultPrice} đ
+                      </Text>
+                      <Text
+                        style={styles.itemName}
+                        numberOfLines={2}
+                        ellipsizeMode="middle">
+                        Danh mục: {category}
+                      </Text>
 
-                    <View style={styles.active}>
-                      <Text style={styles.itemName}>Hoạt động: </Text>
-                      {item.active ? (
-                        <Icon name="checkmark-circle" type="ionicon" />
-                      ) : (
-                        <Icon name="close-circle" type="ionicon" />
-                      )}
+                      <View style={styles.active}>
+                        <Text style={styles.itemName}>Hoạt động: </Text>
+                        {item.active ? (
+                          <Icon name="checkmark-circle" type="ionicon" />
+                        ) : (
+                          <Icon name="close-circle" type="ionicon" />
+                        )}
+                      </View>
                     </View>
                   </View>
+                  <View style={styles.action}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        navigation.navigate('ProductEdit', item);
+                      }}>
+                      <View style={styles.button}>
+                        <Text style={styles.buttonText}>Sửa</Text>
+                        <Icon
+                          name="pencil"
+                          type="ionicon"
+                          color={'white'}
+                          size={20}
+                        />
+                      </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => {
+                        doubleProduct(item);
+                      }}>
+                      <View style={styles.button}>
+                        <Text style={styles.buttonText}>Nhân bản</Text>
+                        <Icon
+                          name="copy"
+                          type="ionicon"
+                          color={'white'}
+                          size={20}
+                        />
+                      </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => {
+                        deleteProductHandle(item.id);
+                      }}>
+                      <View style={styles.button}>
+                        <Text style={styles.buttonText}>Xoá</Text>
+                        <Icon
+                          name="trash"
+                          type="ionicon"
+                          color={'white'}
+                          size={20}
+                        />
+                      </View>
+                    </TouchableOpacity>
+                  </View>
                 </View>
-                <View style={styles.action}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      navigation.navigate('ProductEdit', item);
-                    }}>
-                    <View style={styles.button}>
-                      <Text style={styles.buttonText}>Sửa</Text>
-                      <Icon
-                        name="pencil"
-                        type="ionicon"
-                        color={'white'}
-                        size={20}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => {
-                      doubleProduct(item);
-                    }}>
-                    <View style={styles.button}>
-                      <Text style={styles.buttonText}>Nhân bản</Text>
-                      <Icon
-                        name="copy"
-                        type="ionicon"
-                        color={'white'}
-                        size={20}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => {
-                      deleteProductHandle(item.id);
-                    }}>
-                    <View style={styles.button}>
-                      <Text style={styles.buttonText}>Xoá</Text>
-                      <Icon
-                        name="trash"
-                        type="ionicon"
-                        color={'white'}
-                        size={20}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            );
-          })}
-        </ScrollView>
+              );
+            })}
+          </ScrollView>
+        )}
       </View>
     </View>
   );

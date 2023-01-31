@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Image,
   StyleSheet,
@@ -19,13 +20,16 @@ const CollectionManagement = ({navigation}: any) => {
   const [total, setTotal] = useState(0);
   const isFocused = useIsFocused();
   const [isUpdate, setIsUpdate] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
+    setIsLoading(true);
     getCollections()
       .then(res => {
         if (res.data.count > 0) {
           setTotal(res.data.count);
           setCollectionList(res.data.data);
         }
+        setIsLoading(false);
       })
       .catch(err => {
         console.log(err);
@@ -66,91 +70,98 @@ const CollectionManagement = ({navigation}: any) => {
         />
       </View>
       <View style={styles.body}>
-        <ScrollView
-          style={{
-            flex: 1,
-          }}>
-          {collectionList.map((item: any) => {
-            var url = item.preview;
-            if (url === '') {
-              url = 'https://petitemaika.com/brand.png';
-            }
-            return (
-              <View key={item.id} style={styles.item}>
-                <View style={styles.info}>
-                  <Image source={{uri: url}} style={styles.image} />
-                  <View style={styles.detail}>
-                    <Text
-                      style={styles.itemName}
-                      ellipsizeMode="middle"
-                      numberOfLines={2}>
-                      {item.name}
-                    </Text>
-                    <Text
-                      style={styles.itemName}
-                      ellipsizeMode="middle"
-                      numberOfLines={1}>
-                      Tên rút gọn: {item.internalName}
-                    </Text>
-                    <Text
-                      style={styles.itemName}
-                      ellipsizeMode="middle"
-                      numberOfLines={3}>
-                      Mô tả: {item.description}
-                    </Text>
-                    <Text
-                      style={styles.itemName}
-                      ellipsizeMode="middle"
-                      numberOfLines={2}>
-                      Thứ tự: {item.position}
-                    </Text>
+        {isLoading ? (
+          <View
+            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+            <ActivityIndicator size="large" />
+          </View>
+        ) : (
+          <ScrollView
+            style={{
+              flex: 1,
+            }}>
+            {collectionList.map((item: any) => {
+              var url = item.preview;
+              if (url === '') {
+                url = 'https://petitemaika.com/brand.png';
+              }
+              return (
+                <View key={item.id} style={styles.item}>
+                  <View style={styles.info}>
+                    <Image source={{uri: url}} style={styles.image} />
+                    <View style={styles.detail}>
+                      <Text
+                        style={styles.itemName}
+                        ellipsizeMode="middle"
+                        numberOfLines={2}>
+                        {item.name}
+                      </Text>
+                      <Text
+                        style={styles.itemName}
+                        ellipsizeMode="middle"
+                        numberOfLines={1}>
+                        Tên rút gọn: {item.internalName}
+                      </Text>
+                      <Text
+                        style={styles.itemName}
+                        ellipsizeMode="middle"
+                        numberOfLines={3}>
+                        Mô tả: {item.description}
+                      </Text>
+                      <Text
+                        style={styles.itemName}
+                        ellipsizeMode="middle"
+                        numberOfLines={2}>
+                        Thứ tự: {item.position}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.action}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        navigation.navigate('CollectionEdit', item);
+                      }}>
+                      <View style={styles.button}>
+                        <Text style={styles.buttonText}>Sửa</Text>
+                        <Icon
+                          name="pencil"
+                          type="ionicon"
+                          color={'white'}
+                          size={20}
+                        />
+                      </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity>
+                      <View style={styles.button}>
+                        <Text style={styles.buttonText}>Nhân bản</Text>
+                        <Icon
+                          name="copy"
+                          type="ionicon"
+                          color={'white'}
+                          size={20}
+                        />
+                      </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => {
+                        deleteCollectionHandle(item.id);
+                      }}>
+                      <View style={styles.button}>
+                        <Text style={styles.buttonText}>Xoá</Text>
+                        <Icon
+                          name="trash"
+                          type="ionicon"
+                          color={'white'}
+                          size={20}
+                        />
+                      </View>
+                    </TouchableOpacity>
                   </View>
                 </View>
-                <View style={styles.action}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      navigation.navigate('CollectionEdit', item);
-                    }}>
-                    <View style={styles.button}>
-                      <Text style={styles.buttonText}>Sửa</Text>
-                      <Icon
-                        name="pencil"
-                        type="ionicon"
-                        color={'white'}
-                        size={20}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                  <TouchableOpacity>
-                    <View style={styles.button}>
-                      <Text style={styles.buttonText}>Nhân bản</Text>
-                      <Icon
-                        name="copy"
-                        type="ionicon"
-                        color={'white'}
-                        size={20}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => {
-                      deleteCollectionHandle(item.id);
-                    }}>
-                    <View style={styles.button}>
-                      <Text style={styles.buttonText}>Xoá</Text>
-                      <Icon
-                        name="trash"
-                        type="ionicon"
-                        color={'white'}
-                        size={20}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            );
-          })}
-        </ScrollView>
+              );
+            })}
+          </ScrollView>
+        )}
       </View>
     </View>
   );
